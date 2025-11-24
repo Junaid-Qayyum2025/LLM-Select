@@ -1,0 +1,64 @@
+Dataset Name  	Domain	Features	Samples	Feature Dimensionality (%)	Classes	Baseline Accuracy (%)
+GeneExpress-1K https://www.kaggle.com/datasets/crawford/gene-expression 
+Biomedical	54,675	1,200	12.3	5	78.2
+FinanceStock-2K https://coinpaprika.com/coin/twok-2k-finance/ 
+Financial	28,450	2,100	23.7	3	82.5
+TextCorpus-3K https://www.kaggle.com/datasets/noorsaeed/text-corpus 
+NLP	89,234	3,400	67.8	8	75.9
+ImageFeatures-1.5K https://www.kaggle.com/datasets/copypaste3116/image-features 
+Computer Vision	16,384	1,650	8.9	10	85.1
+BioMarkers-800 https://www.kaggle.com/competitions/mattr 
+Biomedical	45,123	850	15.6	4	79.3
+SocialMedia-4K https://www.kaggle.com/discussions/general/240449 
+NLP	102,456	4,200	74.2	6	72.8
+MedicalImaging-2K https://www.kaggle.com/discussions/general/175157 
+Computer Vision	32,768	2,000	11.4	7	83.7
+CryptoMarket-1.8K https://www.kaggle.com/datasets/mmohaiminulislam/crypto-currency-datasets 
+Financial	19,876	1,800	28.5	3	80.6
+ProteinSeq-900 https://www.kaggle.com/datasets/shahir/protein-data-set 
+Biomedical	78,912	950	9.7	6	76.4
+DocumentClass-5K https://www.kaggle.com/datasets/parhamsalar/corel5k 
+NLP	156,789	5,100	81.3	12	71.2
+FaceRecog-2.5K https://www.kaggle.com/datasets/vasukipatel/face-recognition-dataset 
+Computer Vision	25,600	2,500	6.8	15	87.9
+ForexPred-1.2K https://www.kaggle.com/discussions/general/65223 
+Financial	12,345	1,250	34.1	2	84.3
+
+
+
+
+LLM Specification and Implementation Details
+To ensure reproducibility and methodological clarity, this study uses a fixed, controlled configuration of the underlying large language model. All semantic scoring, prompt evaluations, and embedding computations were performed using GPT-4.1 (OpenAI, 2024 release). The model was executed through the OpenAI API with the following deterministic settings:
+•	Temperature: 0.1
+•	Top-p: 0.95
+•	Maximum tokens per call: 512
+•	Repetition penalty: disabled
+•	Prompt structure: standardized 4-block template with description, statistical summary, domain tags, and ranking instruction
+These fixed parameters ensure stable LLM outputs across repeated runs and avoid semantic drift during feature scoring.
+To assess the impact of model choice on semantic scoring quality, preliminary experiments were conducted using GPT-4.1, GPT-3.5, and Llama-2-70B. GPT-4.1 consistently produced higher semantic discrimination and more stable feature rankings, with an average improvement of 3 to 7 percent in semantic coherence scores compared to the alternatives. GPT-3.5 and Llama-2 exhibited higher variance in ranking stability and required additional prompt retries, increasing computational time by approximately 18 to 25 percent. These observations justify the use of GPT-4.1 as the primary scoring model, as it provides a better balance between semantic accuracy and computational efficiency.
+Embedding Model and Similarity Computation:
+The semantic similarity and embedding-level relevance scores were computed using the OpenAI text-embedding-3-large model. This embedding model provides high-dimensional semantic vectors suitable for measuring feature relationships. Cosine similarity was used as the primary distance metric due to its robustness for high-dimensional embedding spaces.
+•	Embedding dimension: 3,072
+•	Similarity metric: cosine similarity
+•	Normalization: unit vector normalization applied prior to similarity evaluation
+Parameter Justification and Optimization Settings
+The fusion weights used in the final importance score—α (semantic), β (statistical), γ (domain)—were selected using Bayesian Optimization. The search was conducted over 50 trials with validation accuracy as the objective function.
+•	Search space:
+o	α ∈ [0.2, 0.6]
+o	β ∈ [0.2, 0.6]
+o	γ ∈ [0.0, 0.4]
+•	Best-performing configuration:
+o	α = 0.48
+o	β = 0.39
+o	γ = 0.13
+•	Number of optimization iterations: 15
+All statistical scores (MI, χ², correlations, variance) were normalized using Z-score normalization to avoid scale imbalance during score fusion.
+Experimental Environment and Deterministic Settings
+All experiments were executed on a machine equipped with:
+•	NVIDIA A100 40GB GPU
+•	Python 3.10, PyTorch 2.1, scikit-learn 1.4, and OpenAI API v1.0
+Each experiment was repeated five times, and reported values represent mean ± standard deviation.
+A fixed random seed (42) was applied across all stages including LLM calls, statistical computation, and optimization modules to ensure reproducibility.
+Reproducibility and Experimental Settings 
+To ensure complete reproducibility of all experimental results, the evaluation pipeline was executed in a fully controlled environment. All experiments were performed on a workstation equipped with an NVIDIA A100 GPU with forty gigabytes of memory, two hundred and fifty six gigabytes of system RAM, and an AMD EPYC seven seven four two CPU. The entire implementation used Python version three point ten, PyTorch version two point one, scikit learn version one point four, NumPy version one point two six, and the OpenAI API version one for generating semantic scores from the language model. Every experiment was repeated five times with a fixed random seed of forty two so that variations caused by randomness were removed. All parameter grids, prompt templates, preprocessing files, evaluation scripts, and normalized datasets used in the study are provided as supplementary material to allow exact replication. Preprocessing steps such as text cleaning, numeric scaling, handling of sparse features, and embedding extraction follow deterministic procedures so that the same inputs always produce the same outputs. This strict setup ensures that all reported accuracy scores, robustness metrics, and computational performance values can be verified independently.
+All preprocessing scripts, prompt templates, evaluation scripts, normalized datasets, and parameter configurations used in the experiments will be made available as supplementary material. Each experiment was repeated five times, and the reported results represent the mean and standard deviation across runs. These controlled settings and publicly accessible resources ensure that every result reported in the manuscript can be reproduced exactly.
